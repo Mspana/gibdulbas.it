@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graphic Design Is My Passion</title>
+  <style>
+    @keyframes rainbowScroll {
+      0%   { background-position: 0% 0%; }
+      100% { background-position: 0% 100%; }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(
+        to bottom,
+        #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff,
+        #ff0000, #ff7700, #ffff00, #00ff00, #0000ff, #8b00ff,
+        #ff0000
+      );
+      background-size: 100% 400%;
+      animation: rainbowScroll 4s linear infinite paused;
+    }
+
+    /* News ticker */
+    .ticker {
+      position: fixed;
+      top: calc(33vh / 2 - 4em);
+      left: 0; right: 0;
+      background: #0000cc;
+      overflow: hidden;
+      white-space: nowrap;
+      z-index: 100;
+      padding: 16px 0;
+    }
+    @keyframes tickerScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-inner {
+      display: inline-block;
+      animation: tickerScroll 12s linear infinite paused;
+      color: #ff8800;
+      font-family: Arial, sans-serif;
+      font-size: 2.8em;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    /* Bounce on the img */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0)     scaleX(1.06) scaleY(0.95); }
+      50%       { transform: translateY(-40px) scaleX(0.96) scaleY(1.04); }
+    }
+
+    /* Flip cycles on the wrapper */
+    @keyframes flipNormal {
+      0%,  42% { transform: scaleX(1);  }
+      50%       { transform: scaleX(-1); }
+      92%       { transform: scaleX(-1); }
+      100%      { transform: scaleX(1);  }
+    }
+    @keyframes flipFlipped {
+      0%,  42% { transform: scaleX(-1); }
+      50%       { transform: scaleX(1);  }
+      92%       { transform: scaleX(1);  }
+      100%      { transform: scaleX(-1); }
+    }
+
+    .gibbard-wrap {
+      position: fixed;
+      width: 320px;
+      animation: flipNormal 1.612s linear infinite paused;
+    }
+    .gibbard-wrap.flipped {
+      animation: flipFlipped 1.612s linear infinite paused;
+    }
+    .gibbard-wrap img {
+      width: 320px;
+      display: block;
+      animation: bounce 0.403s ease-in-out infinite paused;
+    }
+
+    /* Left pair - start flipped */
+    .g1 { left: 8%;  top: 55%; }
+    .g2 { left: 23%; top: 30%; }
+    /* Right pair - start normal */
+    .g3 { left: 63%; top: 30%; }
+    .g4 { right: 5%; top: 55%; }
+
+    /* Star Wars crawl */
+    .crawl-stage {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 50vh;
+      overflow: hidden;
+      perspective: 300px;
+      perspective-origin: 50% 100%;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 30%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 30%);
+      pointer-events: none;
+    }
+    #crawlTilt {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 100%;
+      transform-origin: 50% 100%;
+      transform: rotateX(25deg);
+    }
+    .crawl-line {
+      position: absolute;
+      width: 800px;
+      left: calc(50% - 400px);
+      text-align: center;
+      color: white;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: 2.8em;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      white-space: nowrap;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="ticker">
+    <span class="ticker-inner">
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+      542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
+    </span>
+  </div>
+
+  <div class="gibbard-wrap flipped g1"><img src="gibbard.png" alt=""></div>
+  <div class="gibbard-wrap flipped g2"><img src="gibbard.png" alt=""></div>
+  <div class="gibbard-wrap g3"><img src="gibbard.png" alt=""></div>
+  <div class="gibbard-wrap g4"><img src="gibbard.png" alt=""></div>
+
+  <div class="crawl-stage">
+    <div id="crawlTilt"></div>
+  </div>
+
+  <audio id="bgm" src="Gang-Plank_Galleon_-_Super_Smash_Bros_Ultimate_KLICKAUD.mp3" loop></audio>
+
+  <div id="splash" style="
+    position:fixed;inset:0;z-index:999;
+    background:#000;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+  ">
+    <div style="
+      color:white;font-family:'Arial Black',Arial,sans-serif;
+      font-size:3em;font-weight:900;text-align:center;
+      text-shadow:0 0 20px #fff;
+      animation: splashPulse 1s ease-in-out infinite alternate;
+    ">CLICK TO ENTER</div>
+  </div>
+  <style>
+    @keyframes splashPulse {
+      from { opacity: 0.5; transform: scale(0.97); }
+      to   { opacity: 1;   transform: scale(1.03); }
+    }
+  </style>
+
+  <script>
+    const tilt = document.getElementById('crawlTilt');
+    const active = [];
+    let lastTs = null;
+    let sinceLastLine = 999; // spawn first line immediately
+    const INTERVAL = 0.85; // seconds between lines
+    const SPEED = 110;     // px/s upward
+
+    function addLine() {
+      const el = document.createElement('div');
+      el.className = 'crawl-line';
+      el.textContent = 'GIBDUL BASIT';
+      el.style.bottom = '-60px';
+      tilt.appendChild(el);
+      active.push({ el, y: -60 });
+    }
+
+    function tick(ts) {
+      const now = ts / 1000;
+      if (lastTs === null) lastTs = now;
+      const dt = Math.min(now - lastTs, 0.05);
+      lastTs = now;
+
+      sinceLastLine += dt;
+      if (sinceLastLine >= INTERVAL) {
+        sinceLastLine -= INTERVAL;
+        addLine();
+      }
+
+      for (let i = active.length - 1; i >= 0; i--) {
+        active[i].y += SPEED * dt;
+        active[i].el.style.bottom = active[i].y + 'px';
+        if (active[i].y > window.innerHeight) {
+          active[i].el.remove();
+          active.splice(i, 1);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    document.getElementById('splash').addEventListener('click', () => {
+      // Unpause all CSS animations
+      document.querySelectorAll('body, .ticker-inner, .gibbard-wrap, .gibbard-wrap img').forEach(el => {
+        el.style.animationPlayState = 'running';
+      });
+      // Start music at 31s
+      const bgm = document.getElementById('bgm');
+      bgm.currentTime = 31;
+      bgm.play();
+      // Start crawl
+      requestAnimationFrame(tick);
+      document.getElementById('splash').remove();
+    });
+  </script>
+</body>
+</html>
