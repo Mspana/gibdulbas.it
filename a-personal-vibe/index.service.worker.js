@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1784844673|9543926';
+const CACHE_VERSION = '1784846269|9084413';
 /** @type {string} */
 const CACHE_PREFIX = 'a personal vibe-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
