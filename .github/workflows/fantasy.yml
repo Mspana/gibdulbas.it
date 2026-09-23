@@ -82,7 +82,18 @@ jobs:
           git add fantasy
           if git diff --cached --quiet; then
             echo "No change this hour."
-          else
-            git commit -m "Fantasy board: refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
-            git push
+            exit 0
           fi
+          git commit -m "Fantasy board: refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
+          # Anything else pushing to main between checkout and now gets the
+          # push rejected, so rebase onto it and try again rather than failing
+          # the hour outright.
+          for attempt in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected, rebasing (attempt $attempt)"
+            git pull --rebase origin main || exit 1
+          done
+          echo "Could not push after three attempts" >&2
+          exit 1
