@@ -1,0 +1,86 @@
+name: Fantasy board
+
+# Only schedule and manual runs: a pull_request trigger would hand the ESPN
+# cookies to any fork that opens one.
+on:
+  schedule:
+    - cron: "7 * * * *"      # hourly, off the hour so we are not in the stampede
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fantasy-board
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the site
+        uses: actions/checkout@v4
+
+      - name: Check out the builder
+        uses: actions/checkout@v4
+        with:
+          repository: Mspana/BetterFantasyUI
+          path: _tool
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # FantasyPros pages, per-player news and headshots all cache on disk.
+      # Without this the job would re-scrape ~600 pages every hour and get
+      # rate limited; with it, an hourly run only refreshes what has expired.
+      - name: Restore scrape cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            _tool/cache
+            _tool/img
+          key: fantasy-cache-${{ github.run_id }}
+          restore-keys: |
+            fantasy-cache-
+
+      - name: Write league config
+        env:
+          ESPN_S2: ${{ secrets.ESPN_S2 }}
+          ESPN_SWID: ${{ secrets.ESPN_SWID }}
+          LEAGUE_ID: ${{ secrets.ESPN_LEAGUE_ID }}
+          TEAM_ID: ${{ secrets.ESPN_TEAM_ID }}
+          SEASON: ${{ secrets.ESPN_SEASON }}
+        run: |
+          mkdir -p _tool/leagues/brunch
+          python - <<'PY'
+          import json, os
+          json.dump({
+              "league_id": int(os.environ["LEAGUE_ID"]),
+              "team_id": int(os.environ["TEAM_ID"]),
+              "season": int(os.environ["SEASON"]),
+              "espn_s2": os.environ["ESPN_S2"],
+              "swid": os.environ["ESPN_SWID"],
+          }, open("_tool/leagues/brunch/config.json", "w"))
+          PY
+
+      - name: Build the board
+        working-directory: _tool
+        run: python run.py brunch
+
+      - name: Render the site
+        working-directory: _tool
+        run: python build_site.py brunch "$GITHUB_WORKSPACE/fantasy"
+
+      - name: Commit if anything changed
+        run: |
+          rm -rf _tool
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add fantasy
+          if git diff --cached --quiet; then
+            echo "No change this hour."
+          else
+            git commit -m "Fantasy board: refresh $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          fi
