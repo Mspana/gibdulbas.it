@@ -48,9 +48,11 @@ jobs:
         env:
           ESPN_S2: ${{ secrets.ESPN_S2 }}
           ESPN_SWID: ${{ secrets.ESPN_SWID }}
-          LEAGUE_ID: ${{ secrets.ESPN_LEAGUE_ID }}
-          TEAM_ID: ${{ secrets.ESPN_TEAM_ID }}
-          SEASON: ${{ secrets.ESPN_SEASON }}
+          # Not secrets. Actions masks every occurrence of a secret's value in
+          # the logs, and a team id of "7" would redact every 7 in the output.
+          LEAGUE_ID: "437516043"
+          TEAM_ID: "7"
+          SEASON: "2026"
         run: |
           mkdir -p _tool/leagues/brunch
           python - <<'PY'
