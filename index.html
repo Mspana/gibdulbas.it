@@ -33,6 +33,7 @@
       white-space: nowrap;
       z-index: 100;
       padding: 16px 0;
+      cursor: pointer;
     }
     @keyframes tickerScroll {
       0%   { transform: translateX(0); }
@@ -130,12 +131,79 @@
       from { opacity: 0.5; transform: scale(0.97); }
       to   { opacity: 1;   transform: scale(1.03); }
     }
+
+    /* Menu popup (opens from the ticker) */
+    .menu {
+      position: fixed;
+      inset: 0;
+      z-index: 150;
+    }
+    .menu-list {
+      position: fixed;
+      left: 0; right: 0;
+      margin: 0 auto;
+      width: min(94vw, 820px);
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(10px, 2.5vw, 18px);
+      padding: 4px;
+      overflow-y: auto;
+      transform-origin: 50% 0;
+      animation: menuPop 0.18s ease-out;
+    }
+    @keyframes menuPop {
+      from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+      to   { opacity: 1; transform: none; }
+    }
+    .menu-item {
+      --av: clamp(64px, min(26vw, 15vh), 160px);
+      display: flex;
+      align-items: flex-end;
+      text-decoration: none;
+      color: #000;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .menu-avatar {
+      flex: none;
+      position: relative;
+      z-index: 1;
+      width: var(--av);
+      height: var(--av);
+      box-sizing: border-box;
+      border: 5px solid #000;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+    }
+    .menu-label {
+      flex: 1;
+      box-sizing: border-box;
+      height: calc(var(--av) * 0.78);
+      margin-left: -20px;
+      padding: 0 28px 0 36px;
+      display: flex;
+      align-items: center;
+      background: #fff;
+      border: 5px solid #000;
+      border-radius: 0 28px 28px 28px;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-size: clamp(1.3rem, 5.6vw, 3rem);
+      font-weight: 900;
+      transition: background 0.1s, color 0.1s;
+    }
+    .menu-item:hover .menu-label,
+    .menu-item:focus-visible .menu-label {
+      background: #0000cc;
+      color: #ff8800;
+    }
+    .menu-item:focus-visible { outline: none; }
   </style>
 </head>
 <body>
   <canvas id="trailCanvas"></canvas>
 
-  <div class="ticker">
+  <div class="ticker" id="ticker" role="button" tabindex="0" aria-haspopup="true" aria-expanded="false" aria-controls="menu">
     <span class="ticker-inner">
       542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
       542 E 79th St, New York, NY 10075 &nbsp;|&nbsp;
@@ -168,6 +236,27 @@
 
   <div class="crawl-stage">
     <div id="crawlTilt"></div>
+  </div>
+
+  <div id="menu" class="menu" hidden>
+    <nav class="menu-list" aria-label="Menu">
+      <a class="menu-item" href="a-personal-vibe/">
+        <img class="menu-avatar" src="fantasy/people/vel-2.webp" alt="">
+        <span class="menu-label">a personal vibe</span>
+      </a>
+      <a class="menu-item" href="fantasy/">
+        <img class="menu-avatar" src="fantasy/people/matt-2.webp" alt="">
+        <span class="menu-label">fantasy football</span>
+      </a>
+      <a class="menu-item" href="harry/">
+        <img class="menu-avatar" src="fantasy/people/harrison-2.webp" alt="">
+        <span class="menu-label">harry game</span>
+      </a>
+      <a class="menu-item" href="kalggb/">
+        <img class="menu-avatar" src="fantasy/people/gibby-2.webp" alt="">
+        <span class="menu-label">kalggb</span>
+      </a>
+    </nav>
   </div>
 
   <audio id="bgm" src="Gang-Plank_Galleon_-_Super_Smash_Bros_Ultimate_KLICKAUD.mp3" loop></audio>
@@ -390,6 +479,30 @@
       }
 
     }
+
+    // ── Menu popup ────────────────────────────────────────────────────────
+    const ticker = document.getElementById('ticker');
+    const menu = document.getElementById('menu');
+    const menuList = menu.querySelector('.menu-list');
+
+    function positionMenu() {
+      const top = ticker.getBoundingClientRect().bottom + 12;
+      menuList.style.top = top + 'px';
+      menuList.style.maxHeight = (window.innerHeight - top - 12) + 'px';
+    }
+    function setMenu(open) {
+      menu.hidden = !open;
+      ticker.setAttribute('aria-expanded', open);
+      if (open) positionMenu();
+    }
+    ticker.addEventListener('click', () => setMenu(menu.hidden));
+    ticker.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setMenu(menu.hidden); }
+    });
+    // Clicking anywhere outside the list (the menu layer covers the page) closes it
+    menu.addEventListener('click', e => { if (!menuList.contains(e.target)) setMenu(false); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') setMenu(false); });
+    window.addEventListener('resize', () => { if (!menu.hidden) positionMenu(); });
 
     // ── Splash ────────────────────────────────────────────────────────────
     document.getElementById('splash').addEventListener('click', () => {
