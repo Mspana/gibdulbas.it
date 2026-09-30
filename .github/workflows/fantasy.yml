@@ -114,7 +114,10 @@ jobs:
               exit 0
             fi
             echo "Push rejected, rebasing (attempt $attempt)"
-            git pull --rebase origin main || exit 1
+            # Another run may have rewritten the same generated files; the
+            # board built in this run is the newer one, so it wins those
+            # conflicts ("theirs" is the commit being replayed in a rebase).
+            git pull --rebase -X theirs origin main || exit 1
           done
           echo "Could not push after three attempts" >&2
           exit 1
