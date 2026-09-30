@@ -44,42 +44,63 @@ jobs:
           restore-keys: |
             fantasy-cache-
 
-      - name: Write league config
+      - name: Write league configs
         env:
+          # Brunch and The Heights are read with one ESPN account, Poj with another.
           ESPN_S2: ${{ secrets.ESPN_S2 }}
           ESPN_SWID: ${{ secrets.ESPN_SWID }}
-          # Not secrets. Actions masks every occurrence of a secret's value in
-          # the logs, and a team id of "7" would redact every 7 in the output.
-          LEAGUE_ID: "437516043"
-          TEAM_ID: "7"
-          SEASON: "2026"
+          POJ_ESPN_S2: ${{ secrets.POJ_ESPN_S2 }}
+          POJ_ESPN_SWID: ${{ secrets.POJ_ESPN_SWID }}
         run: |
-          mkdir -p _tool/leagues/brunch
           python - <<'PY'
           import json, os
-          json.dump({
-              "league_id": int(os.environ["LEAGUE_ID"]),
-              "team_id": int(os.environ["TEAM_ID"]),
-              "season": int(os.environ["SEASON"]),
-              "espn_s2": os.environ["ESPN_S2"],
-              "swid": os.environ["ESPN_SWID"],
-          }, open("_tool/leagues/brunch/config.json", "w"))
+          # league, ESPN league id, our team id, whose cookies read it. The ids
+          # are not secrets: Actions masks every occurrence of a secret's value
+          # in the logs, and a team id of "7" would redact every 7 in the output.
+          LEAGUES = [("brunch", 437516043, 7, ""),
+                     ("heights", 1776817358, 10, ""),
+                     ("poj", 248380, 5, "POJ_")]
+          for name, league, team, account in LEAGUES:
+              os.makedirs(f"_tool/leagues/{name}", exist_ok=True)
+              json.dump({"league_id": league, "team_id": team, "season": 2026,
+                         "espn_s2": os.environ[account + "ESPN_S2"],
+                         "swid": os.environ[account + "ESPN_SWID"]},
+                        open(f"_tool/leagues/{name}/config.json", "w"))
           PY
 
-      - name: Build the board
+      # Each league's model.json comes from the builder repo: the model itself
+      # runs weekly on a PC (weekly.py) and pushes it there.
+      - name: Build the boards
         working-directory: _tool
-        run: python run.py brunch
+        run: |
+          # one league failing -- a FantasyPros rate limit, an expired cookie --
+          # must not take the others down with it
+          for league in brunch heights poj; do
+            python run.py "$league" || echo "::warning::$league board failed this hour"
+          done
 
       - name: Render the site
         working-directory: _tool
-        run: python build_site.py brunch "$GITHUB_WORKSPACE/fantasy"
+        run: |
+          if [ -f leagues/brunch/report.html ]; then
+            python build_site.py brunch "$GITHUB_WORKSPACE/fantasy"
+          fi
+          # the other two are unlisted: no link card, and kept out of search engines
+          if [ -f leagues/heights/report.html ]; then
+            python build_site.py heights "$GITHUB_WORKSPACE/hantasy" --hidden
+          fi
+          if [ -f leagues/poj/report.html ]; then
+            python build_site.py poj "$GITHUB_WORKSPACE/pantasy" --hidden
+          fi
 
       - name: Commit if anything changed
         run: |
           rm -rf _tool
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add fantasy
+          for dir in fantasy hantasy pantasy; do
+            if [ -d "$dir" ]; then git add "$dir"; fi
+          done
           if git diff --cached --quiet; then
             echo "No change this hour."
             exit 0
