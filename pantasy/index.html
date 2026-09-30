@@ -632,10 +632,21 @@ try {
   if (s0 && D.boards[s0] !== undefined || (s0 === "model" && D.model)) scale = s0;
 } catch(e){}
 document.querySelectorAll(".scalebtn").forEach(x => x.setAttribute("aria-pressed", x.dataset.scale === scale));
+// The chosen team is saved as its ESPN id, which survives a rename; a save
+// from before holds the name, and is read (and re-saved) that way once.
+const teamById = id => (D.teams || []).find(t => String(t.id) === String(id));
+const idOfTeam = name => { const t = (D.teams || []).find(x => x.name === name); return t ? String(t.id) : name; };
+let teamSaved = false;
 try {
   const saved = localStorage.getItem(LS("fr_team"));
-  if (saved && D.players.some(p => p.own === saved)) team = saved;
+  const name = teamById(saved) ? teamById(saved).name : saved;
+  if (name && D.players.some(p => p.own === name)){
+    team = name; teamSaved = true;
+    if (!teamById(saved)) localStorage.setItem(LS("fr_team"), idOfTeam(name));
+  }
 } catch(e){}
+// the dropdown is built on the server with the league's own team selected
+if (document.getElementById("team")) document.getElementById("team").value = team;
 let sortKey = "sk", sortDir = 1;
 
 const sk = (p) => p.s[scale].sk;
@@ -1018,7 +1029,8 @@ function showPicker(){
 
 function choose(t){
   team = t;
-  try { localStorage.setItem(LS("fr_team"), t); } catch(e){}
+  try { localStorage.setItem(LS("fr_team"), idOfTeam(t)); } catch(e){}
+  teamSaved = true;
   const el = $("#picker");
   if (el) el.hidden = true;
   const sel = $("#team");
@@ -1698,7 +1710,7 @@ try {
   toggleSchmove(localStorage.getItem(LS("fr_schmove")) === "1");
 } catch(e){ toggleSchmove(false); }
 try {
-  if (!localStorage.getItem(LS("fr_team"))) showPicker();
+  if (!teamSaved) showPicker();
 } catch(e){ showPicker(); }
 
 </script>
